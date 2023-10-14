@@ -79,7 +79,7 @@ def read_excel(path):
                 cell_val = get_cell_val(row[col])
                 if col == 2 and not cell_val:
                     break
-                row_data.append(get_cell_val(row[col]))
+                row_data.append(str(get_cell_val(row[col])))
         else:
             schedule.append(row_data)
 
