@@ -1,6 +1,9 @@
 import zipfile
 import xml.etree.ElementTree
 
+from win32com import client as wc
+import os
+
 import cols
 
 WORD_NAMESPACE = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
@@ -45,8 +48,23 @@ def read_docx(path):
     return schedule
     
 
-def read_doc(path):
-    ...
+def read_doc(full_path):
+
+    w = wc.Dispatch('Word.Application')
+
+    docx_path = full_path+"x"
+
+    doc = w.Documents.Open(full_path)
+    doc.SaveAs(full_path+"x", 16)
+    doc.Close()
+
+    w.Quit()
+
+    schedule = read_docx(docx_path)
+
+    os.remove(docx_path)
+
+    return schedule
 
 
 if __name__ == "__main__":

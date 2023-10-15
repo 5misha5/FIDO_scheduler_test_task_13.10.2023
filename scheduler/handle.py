@@ -13,12 +13,14 @@ WEEKS = 4
 LECT_HALL = 5
 
 
-FEN_SPEC_CUT = {"мен","фін", "екон", "мар"}
+FEN_SPEC_CUT = {"мен","фін", "екон", "мар", "рб"}
 FEN_SPEC = {
     "менеджмент": "мен",
     "фінанси": "фін",
     "економіка": "екон",
-    "маркетинг": "мар"
+    "маркетинг": "мар",
+    "розвиток": "рб",
+    "рб": "рб"
 }
 
 def remove_without_course(data):
@@ -125,7 +127,7 @@ def filter_fen_spec(data, spec):
 
             for spec in FEN_SPEC.keys():
                 if word and len(spec) >= len(word):
-                    l_dist = Levenshtein.ratio(spec[:len(word)], word)
+                    l_dist = Levenshtein.ratio(spec[:len(word)].lower(), word.lower())
                     if l_dist > 0.6 and l_dist>app_word_l_dist:
                         app_word_l_dist = l_dist
                         app_word = spec
@@ -175,7 +177,7 @@ def handle(data, fen_mode:bool = False, spec:str = None):
 
 if __name__ == "__main__":
     from read import read_excel
-    from read_docx import read_docx
+    from read_docx import read_docx, read_doc
 
     from pprint import pprint
     import numpy as np
@@ -193,10 +195,10 @@ if __name__ == "__main__":
 
     
 
-    schedule = remove_none((remove_without_course(read_docx("./files/doc/3.docx"))))
-    my_array = np.array(schedule)
+    # schedule = remove_none((remove_without_course(read_docx("./files/doc/3.docx"))))
+    # my_array = np.array(schedule)
     
-    schedule = handle(read_docx("./files/doc/3.docx"),
+    schedule = handle(read_doc(r"E:\Misha\GitHub\FIDO_scheduler_test_task_13.10.2023\files\Економіка_БП-3_Осінь_2023–2024.doc"),
                                fen_mode=True,
                                spec="екон")
     my_array = np.array(list(map(lambda x: list(map(str, x)),schedule)))
