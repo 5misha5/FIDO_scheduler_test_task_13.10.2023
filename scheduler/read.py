@@ -8,24 +8,71 @@ import xml.etree.ElementTree
 from win32com import client as wc
 import os
 
-import cols
+
+COLS = 6
+
+DAYS_OF_WEEKS = 0
+TIME = 1
+COURSE = 2
+GROUPS = 3
+WEEKS = 4
+LECT_HALL = 5
 
 
 class Reader(ABC):
+    """
+    Abstract base class for data readers.
+
+    Parameters:
+        path (str): The path to the data file.
+
+    """
 
     def __init__(self, path) -> None:
+        """
+        Initialize a Reader instance.
+
+        Parameters:
+            path (str): The path to the data file.
+
+        """
         self.path = path
 
     @abstractmethod
     def read(self):
+        """
+        Abstract method for reading data from a file.
+
+        Returns:
+            list: The read schedule data.
+        """
         pass
 
 class XLSXReader(Reader):
+    """
+    A class for reading schedule data from XLSX files.
 
+    Parameters:
+        path (str): The path to the XLSX file.
+
+    """
     def __init__(self, path) -> None:
+        """
+        Initialize an XLSXReader instance.
+
+        Parameters:
+            path (str): The path to the XLSX file.
+
+        """
         super().__init__(path)
     
     def read(self):
+        """
+        Read data from an XLSX file.
+
+        Returns:
+            list: The read schedule data in a structured format.
+        """
         path = self.path       
         
         ws = openpyxl.load_workbook(path).active
@@ -51,6 +98,16 @@ class XLSXReader(Reader):
         return schedule
 
     def get_cell_val(self, cell, default = None):
+        """
+        Get the value of a cell or the value from a merged cell.
+
+        Parameters:
+            cell: The cell to retrieve the value from.
+            default: The default value to return if the cell is empty or not found.
+
+        Returns:
+            Any: The cell's value or the value from a merged cell if applicable, or the default value.
+        """
         sheet = cell.parent
         rng = [s for s in sheet.merged_cells.ranges if cell.coordinate in s]
         if len(rng)!=0:
@@ -61,7 +118,15 @@ class XLSXReader(Reader):
             return default
     
     def get_schedule_rows_range(self, ws):
+        """
+        Get the range of rows containing schedule information in the worksheet.
 
+        Parameters:
+            ws: The worksheet to search for schedule rows.
+
+        Returns:
+            tuple: A tuple containing the first and last row indices of the schedule rows.
+        """
         days_of_week = {
             "Понеділок", 
             "Вівторок", 
@@ -94,7 +159,16 @@ class XLSXReader(Reader):
         return rows[0], rows[-1]
 
     def get_nearest_up_cell_val(self, cell, default = None):
-            
+        """
+        Get the value of the nearest cell above the given cell.
+
+        Parameters:
+            cell: The cell to start searching from.
+            default: The default value to return if no value is found.
+
+        Returns:
+            Any: The value of the nearest cell above or the default value if not found.
+        """
         if self.get_cell_val(cell):
             return self.get_cell_val(cell)
         
@@ -107,8 +181,22 @@ class XLSXReader(Reader):
         return default
 
 class DOCXReader(Reader):
+    """
+    A class for reading schedule data from DOCX files.
+
+    Parameters:
+        path (str): The path to the DOCX file.
+
+    """
 
     def __init__(self, path) -> None:
+        """
+        Initialize a DOCXReader instance.
+
+        Parameters:
+            path (str): The path to the DOCX file.
+
+        """
         super().__init__(path)
 
         self.WORD_NAMESPACE = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
@@ -119,6 +207,12 @@ class DOCXReader(Reader):
 
     
     def read(self):
+        """
+        Read data from a DOCX file.
+
+        Returns:
+            list: The read schedule data in a structured format.
+        """
         
         path = self.path
 
@@ -127,9 +221,11 @@ class DOCXReader(Reader):
         
         schedule = []
 
-        blank_filler = {
-            cols.DAYS_OF_WEEKS: "",
-            cols.TIME: ""
+        blank_filler = {   #fill blank
+            DAYS_OF_WEEKS: "",
+            TIME: "",
+            WEEKS: "",
+            LECT_HALL: ""
         }
         
         for table_node in tree.iter(self.TABLE):
@@ -139,7 +235,7 @@ class DOCXReader(Reader):
                     continue
                 row_list = []
 
-                if len([i for i in row_node.iter(self.CELL)])!=cols.COLS:
+                if len([i for i in row_node.iter(self.CELL)])!=COLS:
                     break
 
                 for col, cell_node in enumerate(row_node.iter(self.CELL)):
@@ -157,11 +253,30 @@ class DOCXReader(Reader):
         return schedule
 
 class DOCReader(Reader):
+    """
+    A class for reading schedule data from DOC files.
 
+    Parameters:
+        path (str): The path to the DOC file.
+
+    """
     def __init__(self, path) -> None:
+        """
+        Initialize a DOCReader instance.
+
+        Parameters:
+            path (str): The path to the DOC file.
+
+        """
         super().__init__(path)
     
     def read(self):
+        """
+        Read schedule data from a DOC file.
+
+        Returns:
+            list: The read schedule data in a structured format.
+        """
 
         full_path = os.path.abspath(self.path)
 
@@ -183,15 +298,32 @@ class DOCReader(Reader):
     
     
 class AbsoluteReader(Reader):
-    
+    """
+    A class for reading schedule data from files of various formats, determining the format based on file extension.
+
+    Parameters:
+        path (str): The path to the data file.
+
+    """
     def __init__(self, path) -> None:
+        """
+        Initialize an AbsoluteReader instance.
+
+        Parameters:
+            path (str): The path to the data file.
+
+        """
         super().__init__(path)
 
     def read(self):
+        """
+        Read schedule data from a data file, determining its format based on the file extension.
 
+        Returns:
+            list: The read schedule data in a structured format.
+        """
 
         self.path = os.path.abspath(self.path)
-        print(self.path)
         
         filename, file_extension = os.path.splitext(os.path.basename(self.path))
         if file_extension == ".xlsx":
@@ -211,7 +343,7 @@ if __name__ == "__main__":
     #schedule = XLSXReader("./files/Прикладна_математика_БП-4_Осінь_2023–2024.xlsx").read()
     #schedule = DOCXReader("./files/Історія_БП-4_Осінь_2023–2024.docx").read()
     #schedule = DOCReader(r"E:\Misha\GitHub\FIDO_scheduler_test_task_13.10.2023\files\Соціальна_робота_МП-1_Осінь_2023–2024.doc").read()
-    schedule = AbsoluteReader("./files/Соціальна_робота_МП-1_Осінь_2023–2024.doc").read()
+    schedule = AbsoluteReader("./files/Економіка_БП-1_Осінь_2023–2024 (2).doc").read()
 
     #print(all(np.array(schedule).flatten()))
 
