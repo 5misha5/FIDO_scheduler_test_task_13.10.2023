@@ -1,5 +1,7 @@
 
 
+COLS = 6
+
 DAYS_OF_WEEKS = 0
 TIME = 1
 COURSE = 2
