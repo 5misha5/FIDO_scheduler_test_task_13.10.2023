@@ -5,12 +5,7 @@ import json
 import Levenshtein
 import itertools
 
-DAYS_OF_WEEKS = 0
-TIME = 1
-COURSE = 2
-GROUPS = 3
-WEEKS = 4
-LECT_HALL = 5
+import scheduler.cols as cols
 
 def group_by(data, column):
     """
@@ -61,13 +56,17 @@ class Handler():
 
     Parameters:
         data (list): The input data to be processed.
+
         fen_mode (bool): Whether to operate in FEN mode.
-        spec (str): The specialization (required if in FEN mode).
+
+        spec (str): The specialization (required if in FEN mode). One of ["мен","фін", "екон", "мар", "рб"].
 
     Attributes:
         data (list): The data to be processed.
+
         fen_mode (bool): Whether the class operates in FEN mode.
-        spec (str): The specialization to filter data for (only relevant in FEN mode).
+
+        spec (str): The specialization to filter data for (only relevant in FEN mode).  One of ["мен","фін", "екон", "мар", "рб"].
 
     Methods:
         remove_without_course(self):
@@ -103,8 +102,10 @@ class Handler():
 
         Parameters:
             data (list): The input data to be processed.
+
             fen_mode (bool): Whether to operate in FEN mode.
-            spec (str): The specialization (required if in FEN mode).
+
+            spec (str): The specialization (required if in FEN mode).  One of ["мен","фін", "екон", "мар", "рб"].
 
         """
         self.data = data
@@ -117,7 +118,7 @@ class Handler():
         """
         data_copy = []
         for row in self.data:
-            if not ((not row[COURSE]) or row[COURSE].isspace()):
+            if not ((not row[cols.COURSE]) or row[cols.COURSE].isspace()):
                 data_copy.append(row)
 
         self.data = data_copy
@@ -198,9 +199,9 @@ class Handler():
         """
         new_data = []
         for row in self.data:
-            for group in row[GROUPS]:
+            for group in row[cols.GROUPS]:
                 new_row = row[:]
-                new_row[GROUPS] = group
+                new_row[cols.GROUPS] = group
                 new_data.append(new_row)
 
         self.data = new_data
@@ -211,6 +212,7 @@ class Handler():
 
         Parameters:
             column (int): The column index to process.
+
             function (function): The function to apply to the column.
         """
         for i, row in enumerate(self.data):
@@ -223,14 +225,15 @@ class Handler():
 
         Parameters:
             fen_mode (bool): Whether to operate in FEN mode.
-            spec (str): The specialization (required if in FEN mode).
+
+            spec (str): The specialization (required if in FEN mode).  One of ["мен","фін", "екон", "мар", "рб"].
 
         """
         self.remove_without_course()
         self.remove_none()
-        self.handle_by_column(DAYS_OF_WEEKS, self.day_of_week_to_normal)
-        self.handle_by_column(WEEKS, self.weeks_to_list)
-        self.handle_by_column(GROUPS, self.groups_to_list)
+        self.handle_by_column(cols.DAYS_OF_WEEKS, self.day_of_week_to_normal)
+        self.handle_by_column(cols.WEEKS, self.weeks_to_list)
+        self.handle_by_column(cols.GROUPS, self.groups_to_list)
         self.split_groups()
 
         if self.fen_mode:
@@ -245,12 +248,16 @@ class FENFilter():
 
     Parameters:
         data (list): A 2d list of data to be filtered.
-        spec (str): The specialization to filter data for.
+
+        spec (str): The specialization to filter data for.  One of ["мен","фін", "екон", "мар", "рб"].
 
     Attributes:
         data (list): The input data to be filtered.
-        spec (str): The specialization to filter data for.
+
+        spec (str): The specialization to filter data for.  One of ["мен","фін", "екон", "мар", "рб"].
+
         FEN_SPEC_CUT (set): A set of abbreviation names for specializations.
+
         FEN_SPEC (dict): A dictionary mapping specialization names to abbreviations.
 
     Methods:
@@ -271,7 +278,8 @@ class FENFilter():
 
         Parameters:
             data (list): A 2d list of data to be filtered.
-            spec (str): The specialization to filter data for.
+            
+            spec (str): The specialization to filter data for.  One of ["мен","фін", "екон", "мар", "рб"].
 
         """
         self.data = data
@@ -310,8 +318,8 @@ class FENFilter():
         """
         spec = self.spec
 
-        course = spec_data[COURSE]
-        group = spec_data[GROUPS]
+        course = spec_data[cols.COURSE]
+        group = spec_data[cols.GROUPS]
         brackets = list(map(lambda x: x[1:-1], re.findall(r'\(.*?\)', course)))
         
         group_words = ["".join(group) for key, group in itertools.groupby(group, str.isalpha) if key]
@@ -368,9 +376,9 @@ if __name__ == "__main__":
                                fen_mode=True,
                                spec="екон")
     handler.handle()
-    schedule = to_dict(handler.data, [COURSE, GROUPS, DAYS_OF_WEEKS], {"час": TIME, 
-                                                                       "аудиторія": LECT_HALL, 
-                                                                       "тижні": WEEKS})
+    schedule = to_dict(handler.data, [cols.COURSE, cols.GROUPS, cols.DAYS_OF_WEEKS], {"час": cols.TIME, 
+                                                                       "аудиторія": cols.LECT_HALL, 
+                                                                       "тижні": cols.WEEKS})
     
     with open("data.json", 'w', encoding='utf8') as json_file:
         json.dump(schedule, json_file, ensure_ascii=False, indent=4)
@@ -400,7 +408,7 @@ if __name__ == "__main__":
 
     # schedule = group_by(handle(read_docx("./files/doc/3.docx"), 
     #                            fen_mode=True,
-    #                            spec="екон"),COURSE)
+    #                            spec="екон"),cols.COURSE)
     
     # for key,item in schedule.items():
     #     my_array = np.array(list(map(lambda x: list(map(str, x)),item)))

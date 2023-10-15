@@ -1,9 +1,9 @@
 import json
 import os
 
-from read import AbsoluteReader
-from handle import Handler, to_dict
-import cols
+from scheduler.read import AbsoluteReader
+from scheduler.handle import Handler, to_dict
+import scheduler.cols as cols
 
 def file_to_json(data_path, json_path = "data.json", fen_mode = False, fen_spec = None):
     """
@@ -11,9 +11,12 @@ def file_to_json(data_path, json_path = "data.json", fen_mode = False, fen_spec 
 
     Parameters:
         data_path (str): The path to the input data file.
+
         json_path (str): The path to the output JSON file. Default is "data.json".
+
         fen_mode (bool): Whether to operate in FEN mode. Default is False.
-        fen_spec (str): The specialization (required if in FEN mode).
+        
+        fen_spec (str): The specialization (required if in FEN mode). One of ["мен","фін", "екон", "мар", "рб"].
 
     """
     data = AbsoluteReader(os.path.abspath(data_path)).read()

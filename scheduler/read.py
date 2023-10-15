@@ -8,15 +8,8 @@ import xml.etree.ElementTree
 from win32com import client as wc
 import os
 
+import scheduler.cols as cols
 
-COLS = 6
-
-DAYS_OF_WEEKS = 0
-TIME = 1
-COURSE = 2
-GROUPS = 3
-WEEKS = 4
-LECT_HALL = 5
 
 
 class Reader(ABC):
@@ -103,6 +96,7 @@ class XLSXReader(Reader):
 
         Parameters:
             cell: The cell to retrieve the value from.
+            
             default: The default value to return if the cell is empty or not found.
 
         Returns:
@@ -164,6 +158,7 @@ class XLSXReader(Reader):
 
         Parameters:
             cell: The cell to start searching from.
+
             default: The default value to return if no value is found.
 
         Returns:
@@ -222,10 +217,10 @@ class DOCXReader(Reader):
         schedule = []
 
         blank_filler = {   #fill blank
-            DAYS_OF_WEEKS: "",
-            TIME: "",
-            WEEKS: "",
-            LECT_HALL: ""
+            cols.DAYS_OF_WEEKS: "",
+            cols.TIME: "",
+            cols.WEEKS: "",
+            cols.LECT_HALL: ""
         }
         
         for table_node in tree.iter(self.TABLE):
@@ -235,7 +230,7 @@ class DOCXReader(Reader):
                     continue
                 row_list = []
 
-                if len([i for i in row_node.iter(self.CELL)])!=COLS:
+                if len([i for i in row_node.iter(self.CELL)])!=cols.COLS:
                     break
 
                 for col, cell_node in enumerate(row_node.iter(self.CELL)):
@@ -324,6 +319,7 @@ class AbsoluteReader(Reader):
         """
 
         self.path = os.path.abspath(self.path)
+        print(self.path)
         
         filename, file_extension = os.path.splitext(os.path.basename(self.path))
         if file_extension == ".xlsx":
