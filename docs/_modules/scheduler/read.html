@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scheduler.read &mdash; UKMA_schedule_file_scraper 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            UKMA_schedule_file_scraper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../scheduler.html">scheduler package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">UKMA_schedule_file_scraper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scheduler.read</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scheduler.read</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">openpyxl</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
+
+<span class="kn">import</span> <span class="nn">zipfile</span>
+<span class="kn">import</span> <span class="nn">xml.etree.ElementTree</span>
+
+<span class="kn">from</span> <span class="nn">win32com</span> <span class="kn">import</span> <span class="n">client</span> <span class="k">as</span> <span class="n">wc</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">import</span> <span class="nn">scheduler.cols</span> <span class="k">as</span> <span class="nn">cols</span>
+
+
+
+<div class="viewcode-block" id="Reader">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.Reader">[docs]</a>
+<span class="k">class</span> <span class="nc">Reader</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Abstract base class for data readers.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        path (str): The path to the data file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a Reader instance.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            path (str): The path to the data file.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+
+<div class="viewcode-block" id="Reader.read">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.Reader.read">[docs]</a>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Abstract method for reading data from a file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: The read schedule data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+</div>
+
+
+<div class="viewcode-block" id="XLSXReader">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.XLSXReader">[docs]</a>
+<span class="k">class</span> <span class="nc">XLSXReader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for reading schedule data from XLSX files.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        path (str): The path to the XLSX file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize an XLSXReader instance.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            path (str): The path to the XLSX file.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="XLSXReader.read">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.XLSXReader.read">[docs]</a>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read data from an XLSX file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: The read schedule data in a structured format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>       
+        
+        <span class="n">ws</span> <span class="o">=</span> <span class="n">openpyxl</span><span class="o">.</span><span class="n">load_workbook</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">active</span>
+
+        <span class="n">schedule</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">rows_range</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_schedule_rows_range</span><span class="p">(</span><span class="n">ws</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">ws</span><span class="o">.</span><span class="n">iter_rows</span><span class="p">(</span><span class="n">rows_range</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rows_range</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+
+            <span class="n">row_data</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">6</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">}:</span>
+                    <span class="n">row_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_nearest_up_cell_val</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">cell_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cell_val</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+
+                    <span class="n">row_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_cell_val</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="n">col</span><span class="p">])))</span>
+
+            <span class="n">schedule</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row_data</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">schedule</span></div>
+
+
+<div class="viewcode-block" id="XLSXReader.get_cell_val">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.XLSXReader.get_cell_val">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_cell_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the value of a cell or the value from a merged cell.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            cell: The cell to retrieve the value from.</span>
+<span class="sd">            </span>
+<span class="sd">            default: The default value to return if the cell is empty or not found.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Any: The cell&#39;s value or the value from a merged cell if applicable, or the default value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sheet</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">parent</span>
+        <span class="n">rng</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">merged_cells</span><span class="o">.</span><span class="n">ranges</span> <span class="k">if</span> <span class="n">cell</span><span class="o">.</span><span class="n">coordinate</span> <span class="ow">in</span> <span class="n">s</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sheet</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">rng</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min_row</span><span class="p">,</span> <span class="n">rng</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">min_col</span><span class="p">)</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">elif</span> <span class="n">cell</span><span class="o">.</span><span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cell</span><span class="o">.</span><span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="k">return</span> <span class="n">default</span></div>
+
+    
+<div class="viewcode-block" id="XLSXReader.get_schedule_rows_range">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.XLSXReader.get_schedule_rows_range">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_schedule_rows_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ws</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the range of rows containing schedule information in the worksheet.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            ws: The worksheet to search for schedule rows.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            tuple: A tuple containing the first and last row indices of the schedule rows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">days_of_week</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;Понеділок&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;Вівторок&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;Середа&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;Четвер&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;П&#39;ятниця&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Субота&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Неділя&quot;</span>
+        <span class="p">}</span>
+        
+
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">cellA</span><span class="p">,</span> <span class="n">cellB</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ws</span><span class="p">[</span><span class="s2">&quot;A&quot;</span><span class="p">],</span> <span class="n">ws</span><span class="p">[</span><span class="s2">&quot;B&quot;</span><span class="p">]):</span>
+            <span class="n">cellA_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cell_val</span><span class="p">(</span><span class="n">cellA</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="n">cellB_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cell_val</span><span class="p">(</span><span class="n">cellB</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span>  <span class="n">cellB_val</span> <span class="ow">and</span> \
+                <span class="p">(</span>
+                <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;[0-9]:[0-9][0-9]-[0-9]:[0-9][0-9]&quot;</span>
+                        <span class="p">,</span> <span class="n">cellB_val</span><span class="p">)</span> <span class="ow">or</span> 
+                <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;[0-9]:[0-9][0-9]-[0-9][0-9]:[0-9][0-9]&quot;</span>
+                        <span class="p">,</span> <span class="n">cellB_val</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;[0-9][0-9]:[0-9][0-9]-[0-9]:[0-9][0-9]&quot;</span>
+                        <span class="p">,</span> <span class="n">cellB_val</span><span class="p">)</span> <span class="ow">or</span> 
+                <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s2">&quot;[0-9][0-9]:[0-9][0-9]-[0-9][0-9]:[0-9][0-9]&quot;</span>
+                        <span class="p">,</span> <span class="n">cellB_val</span><span class="p">)</span> <span class="ow">or</span>
+                <span class="n">cellA_val</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="ow">in</span> <span class="n">days_of_week</span>
+                <span class="p">):</span>
+                <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cellB</span><span class="o">.</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">rows</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="XLSXReader.get_nearest_up_cell_val">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.XLSXReader.get_nearest_up_cell_val">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_nearest_up_cell_val</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cell</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the value of the nearest cell above the given cell.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            cell: The cell to start searching from.</span>
+
+<span class="sd">            default: The default value to return if no value is found.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Any: The value of the nearest cell above or the default value if not found.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cell_val</span><span class="p">(</span><span class="n">cell</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cell_val</span><span class="p">(</span><span class="n">cell</span><span class="p">)</span>
+        
+        <span class="n">sheet</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">parent</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cell</span><span class="o">.</span><span class="n">row</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">cell_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_cell_val</span><span class="p">(</span><span class="n">sheet</span><span class="o">.</span><span class="n">cell</span><span class="p">(</span><span class="n">row</span> <span class="o">=</span> <span class="n">row</span><span class="p">,</span> <span class="n">column</span> <span class="o">=</span> <span class="n">cell</span><span class="o">.</span><span class="n">column</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">cell_val</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">cell_val</span>
+        
+        <span class="k">return</span> <span class="n">default</span></div>
+</div>
+
+
+<div class="viewcode-block" id="DOCXReader">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.DOCXReader">[docs]</a>
+<span class="k">class</span> <span class="nc">DOCXReader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for reading schedule data from DOCX files.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        path (str): The path to the DOCX file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a DOCXReader instance.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            path (str): The path to the DOCX file.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">WORD_NAMESPACE</span> <span class="o">=</span> <span class="s1">&#39;{http://schemas.openxmlformats.org/wordprocessingml/2006/main}&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TEXT</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">WORD_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;t&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">TABLE</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">WORD_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;tbl&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ROW</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">WORD_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;tr&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">CELL</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">WORD_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;tc&#39;</span>
+
+    
+<div class="viewcode-block" id="DOCXReader.read">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.DOCXReader.read">[docs]</a>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read data from a DOCX file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: The read schedule data in a structured format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
+
+        <span class="k">with</span> <span class="n">zipfile</span><span class="o">.</span><span class="n">ZipFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">docx</span><span class="p">:</span>
+            <span class="n">tree</span> <span class="o">=</span> <span class="n">xml</span><span class="o">.</span><span class="n">etree</span><span class="o">.</span><span class="n">ElementTree</span><span class="o">.</span><span class="n">XML</span><span class="p">(</span><span class="n">docx</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s1">&#39;word/document.xml&#39;</span><span class="p">))</span>
+        
+        <span class="n">schedule</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">blank_filler</span> <span class="o">=</span> <span class="p">{</span>   <span class="c1">#fill blank</span>
+            <span class="n">cols</span><span class="o">.</span><span class="n">DAYS_OF_WEEKS</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">cols</span><span class="o">.</span><span class="n">TIME</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">cols</span><span class="o">.</span><span class="n">WEEKS</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="n">cols</span><span class="o">.</span><span class="n">LECT_HALL</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">}</span>
+        
+        <span class="k">for</span> <span class="n">table_node</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TABLE</span><span class="p">):</span>
+            
+            <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">row_node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">table_node</span><span class="o">.</span><span class="n">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ROW</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">row</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">row_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">([</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">row_node</span><span class="o">.</span><span class="n">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CELL</span><span class="p">)])</span><span class="o">!=</span><span class="n">cols</span><span class="o">.</span><span class="n">COLS</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+                <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">cell_node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row_node</span><span class="o">.</span><span class="n">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">CELL</span><span class="p">)):</span>
+                    <span class="n">cell_value</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">cell_node</span><span class="o">.</span><span class="n">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">TEXT</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">blank_filler</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">cell_value</span><span class="p">)</span> <span class="ow">or</span> <span class="n">cell_value</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+                            <span class="n">cell_value</span> <span class="o">=</span> <span class="n">blank_filler</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">blank_filler</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">cell_value</span>
+                        
+                    <span class="n">row_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cell_value</span><span class="p">)</span>
+
+                <span class="n">schedule</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row_list</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">schedule</span></div>
+</div>
+
+
+<div class="viewcode-block" id="DOCReader">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.DOCReader">[docs]</a>
+<span class="k">class</span> <span class="nc">DOCReader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for reading schedule data from DOC files.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        path (str): The path to the DOC file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a DOCReader instance.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            path (str): The path to the DOC file.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="DOCReader.read">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.DOCReader.read">[docs]</a>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read schedule data from a DOC file.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: The read schedule data in a structured format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+        <span class="n">w</span> <span class="o">=</span> <span class="n">wc</span><span class="o">.</span><span class="n">Dispatch</span><span class="p">(</span><span class="s1">&#39;Word.Application&#39;</span><span class="p">)</span>
+
+        <span class="n">docx_path</span> <span class="o">=</span> <span class="n">full_path</span><span class="o">+</span><span class="s2">&quot;x&quot;</span>
+
+        <span class="n">doc</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">Documents</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">SaveAs</span><span class="p">(</span><span class="n">full_path</span><span class="o">+</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="mi">16</span><span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">Close</span><span class="p">()</span>
+
+        <span class="n">w</span><span class="o">.</span><span class="n">Quit</span><span class="p">()</span>
+
+        <span class="n">schedule</span> <span class="o">=</span> <span class="n">DOCXReader</span><span class="p">(</span><span class="n">docx_path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">docx_path</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">schedule</span></div>
+</div>
+
+    
+    
+<div class="viewcode-block" id="AbsoluteReader">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.AbsoluteReader">[docs]</a>
+<span class="k">class</span> <span class="nc">AbsoluteReader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for reading schedule data from files of various formats, determining the format based on file extension.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        path (str): The path to the data file.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize an AbsoluteReader instance.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            path (str): The path to the data file.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AbsoluteReader.read">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.read.AbsoluteReader.read">[docs]</a>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read schedule data from a data file, determining its format based on the file extension.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: The read schedule data in a structured format.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        
+        <span class="n">filename</span><span class="p">,</span> <span class="n">file_extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">file_extension</span> <span class="o">==</span> <span class="s2">&quot;.xlsx&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">XLSXReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">file_extension</span> <span class="o">==</span> <span class="s2">&quot;.docx&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DOCXReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">file_extension</span> <span class="o">==</span> <span class="s2">&quot;.doc&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">DOCReader</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;extension should be one of [&quot;.xlsx&quot;, &quot;.docx&quot;, &quot;.doc&quot;]&#39;</span><span class="p">)</span></div>
+</div>
+
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+    <span class="c1">#schedule = XLSXReader(&quot;./files/Прикладна_математика_БП-4_Осінь_2023–2024.xlsx&quot;).read()</span>
+    <span class="c1">#schedule = DOCXReader(&quot;./files/Історія_БП-4_Осінь_2023–2024.docx&quot;).read()</span>
+    <span class="c1">#schedule = DOCReader(r&quot;E:\Misha\GitHub\FIDO_scheduler_test_task_13.10.2023\files\Соціальна_робота_МП-1_Осінь_2023–2024.doc&quot;).read()</span>
+    <span class="n">schedule</span> <span class="o">=</span> <span class="n">AbsoluteReader</span><span class="p">(</span><span class="s2">&quot;./files/Економіка_БП-1_Осінь_2023–2024 (2).doc&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+
+    <span class="c1">#print(all(np.array(schedule).flatten()))</span>
+
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+    <span class="n">my_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">schedule</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">my_array</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;День&#39;</span><span class="p">,</span><span class="s1">&#39;Час&#39;</span><span class="p">,</span><span class="s1">&#39;Дисципліна, викладач&#39;</span><span class="p">,</span> <span class="s2">&quot;Група&quot;</span><span class="p">,</span> <span class="s2">&quot;Тижні&quot;</span><span class="p">,</span> <span class="s2">&quot;Аудиторія&quot;</span><span class="p">])</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">to_markdown</span><span class="p">())</span>
+    <span class="c1">#pprint(schedule)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Misha Oborin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

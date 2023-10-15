@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scheduler package &mdash; UKMA_schedule_file_scraper 1.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Welcome to UKMA_schedule_file_scraper’s documentation!" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UKMA_schedule_file_scraper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">scheduler package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scheduler.cols">scheduler.cols module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scheduler.handle">scheduler.handle module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scheduler.handle.FENFilter"><code class="docutils literal notranslate"><span class="pre">FENFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.handle.FENFilter.filter_spec"><code class="docutils literal notranslate"><span class="pre">FENFilter.filter_spec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.handle.FENFilter.is_spec_appropriate"><code class="docutils literal notranslate"><span class="pre">FENFilter.is_spec_appropriate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.handle.FENFilter.spec_name"><code class="docutils literal notranslate"><span class="pre">FENFilter.spec_name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scheduler.handle.Handler"><code class="docutils literal notranslate"><span class="pre">Handler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.handle.Handler.day_of_week_to_normal"><code class="docutils literal notranslate"><span class="pre">Handler.day_of_week_to_normal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.handle.Handler.groups_to_list"><code class="docutils literal notranslate"><span class="pre">Handler.groups_to_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.handle.Handler.handle"><code class="docutils literal notranslate"><span class="pre">Handler.handle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.handle.Handler.handle_by_column"><code class="docutils literal notranslate"><span class="pre">Handler.handle_by_column()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.handle.Handler.remove_none"><code class="docutils literal notranslate"><span class="pre">Handler.remove_none()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.handle.Handler.remove_without_course"><code class="docutils literal notranslate"><span class="pre">Handler.remove_without_course()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.handle.Handler.split_groups"><code class="docutils literal notranslate"><span class="pre">Handler.split_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.handle.Handler.weeks_to_list"><code class="docutils literal notranslate"><span class="pre">Handler.weeks_to_list()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scheduler.handle.group_by"><code class="docutils literal notranslate"><span class="pre">group_by()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#scheduler.handle.to_dict"><code class="docutils literal notranslate"><span class="pre">to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scheduler.read">scheduler.read module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scheduler.read.AbsoluteReader"><code class="docutils literal notranslate"><span class="pre">AbsoluteReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.read.AbsoluteReader.read"><code class="docutils literal notranslate"><span class="pre">AbsoluteReader.read()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scheduler.read.DOCReader"><code class="docutils literal notranslate"><span class="pre">DOCReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.read.DOCReader.read"><code class="docutils literal notranslate"><span class="pre">DOCReader.read()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scheduler.read.DOCXReader"><code class="docutils literal notranslate"><span class="pre">DOCXReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.read.DOCXReader.read"><code class="docutils literal notranslate"><span class="pre">DOCXReader.read()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scheduler.read.Reader"><code class="docutils literal notranslate"><span class="pre">Reader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.read.Reader.read"><code class="docutils literal notranslate"><span class="pre">Reader.read()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#scheduler.read.XLSXReader"><code class="docutils literal notranslate"><span class="pre">XLSXReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.read.XLSXReader.get_cell_val"><code class="docutils literal notranslate"><span class="pre">XLSXReader.get_cell_val()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.read.XLSXReader.get_nearest_up_cell_val"><code class="docutils literal notranslate"><span class="pre">XLSXReader.get_nearest_up_cell_val()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.read.XLSXReader.get_schedule_rows_range"><code class="docutils literal notranslate"><span class="pre">XLSXReader.get_schedule_rows_range()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scheduler.read.XLSXReader.read"><code class="docutils literal notranslate"><span class="pre">XLSXReader.read()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scheduler.to_json">scheduler.to_json module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#scheduler.to_json.file_to_json"><code class="docutils literal notranslate"><span class="pre">file_to_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-scheduler">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UKMA_schedule_file_scraper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">scheduler package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/scheduler.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="scheduler-package">
+<h1>scheduler package<a class="headerlink" href="#scheduler-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-scheduler.cols">
+<span id="scheduler-cols-module"></span><h2>scheduler.cols module<a class="headerlink" href="#module-scheduler.cols" title="Link to this heading"></a></h2>
+</section>
+<section id="module-scheduler.handle">
+<span id="scheduler-handle-module"></span><h2>scheduler.handle module<a class="headerlink" href="#module-scheduler.handle" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="scheduler.handle.FENFilter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scheduler.handle.</span></span><span class="sig-name descname"><span class="pre">FENFilter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#FENFilter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.FENFilter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class for filtering data based on specified criteria.</p>
+<dl>
+<dt>Parameters:</dt><dd><p>data (list): A 2d list of data to be filtered.</p>
+<p>spec (str): The specialization to filter data for.  One of [“мен”,”фін”, “екон”, “мар”, “рб”].</p>
+</dd>
+<dt>Attributes:</dt><dd><p>data (list): The input data to be filtered.</p>
+<p>spec (str): The specialization to filter data for.  One of [“мен”,”фін”, “екон”, “мар”, “рб”].</p>
+<p>FEN_SPEC_CUT (set): A set of abbreviation names for specializations.</p>
+<p>FEN_SPEC (dict): A dictionary mapping specialization names to abbreviations.</p>
+</dd>
+<dt>Methods:</dt><dd><dl class="simple">
+<dt>filter_spec(self):</dt><dd><p>Filter the data based on the provided specialization.</p>
+</dd>
+<dt>is_spec_appropriate(self, spec_data):</dt><dd><p>Check if a specific data entry is appropriate for the given specialization.</p>
+</dd>
+<dt>spec_name(self, word):</dt><dd><p>Find the specialization abbreviation for a given word.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.handle.FENFilter.filter_spec">
+<span class="sig-name descname"><span class="pre">filter_spec</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#FENFilter.filter_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.FENFilter.filter_spec" title="Link to this definition"></a></dt>
+<dd><p>Filter the data based on the provided specialization.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>list: A filtered 2d list of data entries.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.handle.FENFilter.is_spec_appropriate">
+<span class="sig-name descname"><span class="pre">is_spec_appropriate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">spec_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#FENFilter.is_spec_appropriate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.FENFilter.is_spec_appropriate" title="Link to this definition"></a></dt>
+<dd><p>Check if a specific data entry is appropriate for the given specialization.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>spec_data (list): Data entry to be checked.</p>
+</dd>
+<dt>Returns:</dt><dd><p>bool: True if the data entry is appropriate, False otherwise.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.handle.FENFilter.spec_name">
+<span class="sig-name descname"><span class="pre">spec_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">word</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#FENFilter.spec_name"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.FENFilter.spec_name" title="Link to this definition"></a></dt>
+<dd><p>Find the specialization abbreviation for a given word</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>word (str): The word to be matched with specialization names.</p>
+</dd>
+<dt>Returns:</dt><dd><p>str or None: The abbreviation of the specialization if found, or None if not found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scheduler.handle.Handler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scheduler.handle.</span></span><span class="sig-name descname"><span class="pre">Handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fen_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#Handler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.Handler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>A class for handling and processing data.</p>
+<dl>
+<dt>Parameters:</dt><dd><p>data (list): The input data to be processed.</p>
+<p>fen_mode (bool): Whether to operate in FEN mode.</p>
+<p>spec (str): The specialization (required if in FEN mode). One of [“мен”,”фін”, “екон”, “мар”, “рб”].</p>
+</dd>
+<dt>Attributes:</dt><dd><p>data (list): The data to be processed.</p>
+<p>fen_mode (bool): Whether the class operates in FEN mode.</p>
+<p>spec (str): The specialization to filter data for (only relevant in FEN mode).  One of [“мен”,”фін”, “екон”, “мар”, “рб”].</p>
+</dd>
+<dt>Methods:</dt><dd><dl class="simple">
+<dt>remove_without_course(self):</dt><dd><p>Remove rows with missing or empty course information.</p>
+</dd>
+<dt>remove_none(self):</dt><dd><p>Remove empty or whitespace values in the data.</p>
+</dd>
+<dt>day_of_week_to_normal(self, day_of_week: str):</dt><dd><p>Convert a day of the week to its normalized form.</p>
+</dd>
+<dt>weeks_to_list(self, weeks: str):</dt><dd><p>Convert a string of weeks to a list of integers.</p>
+</dd>
+<dt>groups_to_list(self, groups: str):</dt><dd><p>Convert a string of groups to a list of group names.</p>
+</dd>
+<dt>split_groups(self):</dt><dd><p>Split rows with multiple groups into separate rows.</p>
+</dd>
+<dt>handle_by_column(self, column, function):</dt><dd><p>Apply a function to a specific column in the data.</p>
+</dd>
+<dt>handle(self, fen_mode: bool = False, spec: str = None):</dt><dd><p>Main data processing routine, including various data transformations.
+If in FEN mode, it filters the data based on the provided specialization.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.handle.Handler.day_of_week_to_normal">
+<span class="sig-name descname"><span class="pre">day_of_week_to_normal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">day_of_week</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#Handler.day_of_week_to_normal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.Handler.day_of_week_to_normal" title="Link to this definition"></a></dt>
+<dd><p>Convert a day of the week to its normalized form.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>day_of_week (str): The original day of the week.</p>
+</dd>
+<dt>Returns:</dt><dd><p>str: The normalized day of the week.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.handle.Handler.groups_to_list">
+<span class="sig-name descname"><span class="pre">groups_to_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#Handler.groups_to_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.Handler.groups_to_list" title="Link to this definition"></a></dt>
+<dd><p>Convert a string of groups to a list of group names.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>groups (str): The string representing groups.</p>
+</dd>
+<dt>Returns:</dt><dd><p>list of str: A list of group names.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.handle.Handler.handle">
+<span class="sig-name descname"><span class="pre">handle</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fen_mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">spec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#Handler.handle"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.Handler.handle" title="Link to this definition"></a></dt>
+<dd><p>Main data processing routine, including various data transformations.
+If in FEN mode, it filters the data based on the provided specialization.</p>
+<dl>
+<dt>Parameters:</dt><dd><p>fen_mode (bool): Whether to operate in FEN mode.</p>
+<p>spec (str): The specialization (required if in FEN mode).  One of [“мен”,”фін”, “екон”, “мар”, “рб”].</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.handle.Handler.handle_by_column">
+<span class="sig-name descname"><span class="pre">handle_by_column</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">column</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#Handler.handle_by_column"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.Handler.handle_by_column" title="Link to this definition"></a></dt>
+<dd><p>Apply a function to a specific column in the data.</p>
+<dl>
+<dt>Parameters:</dt><dd><p>column (int): The column index to process.</p>
+<p>function (function): The function to apply to the column.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.handle.Handler.remove_none">
+<span class="sig-name descname"><span class="pre">remove_none</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#Handler.remove_none"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.Handler.remove_none" title="Link to this definition"></a></dt>
+<dd><p>Remove empty or whitespace values in the data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.handle.Handler.remove_without_course">
+<span class="sig-name descname"><span class="pre">remove_without_course</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#Handler.remove_without_course"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.Handler.remove_without_course" title="Link to this definition"></a></dt>
+<dd><p>Remove rows with missing or empty course information.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.handle.Handler.split_groups">
+<span class="sig-name descname"><span class="pre">split_groups</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#Handler.split_groups"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.Handler.split_groups" title="Link to this definition"></a></dt>
+<dd><p>Split rows with multiple groups into separate rows.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.handle.Handler.weeks_to_list">
+<span class="sig-name descname"><span class="pre">weeks_to_list</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">weeks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#Handler.weeks_to_list"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.Handler.weeks_to_list" title="Link to this definition"></a></dt>
+<dd><p>Convert a string of weeks to a list of integers.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>weeks (str): The string representing weeks.</p>
+</dd>
+<dt>Returns:</dt><dd><p>list of int: A list of week numbers.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scheduler.handle.group_by">
+<span class="sig-prename descclassname"><span class="pre">scheduler.handle.</span></span><span class="sig-name descname"><span class="pre">group_by</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#group_by"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.group_by" title="Link to this definition"></a></dt>
+<dd><p>Group a list of dictionaries based on a specified column.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>data (list): The 2d list to be grouped.
+column (str): The column index by which to group the data.</p>
+</dd>
+<dt>Returns:</dt><dd><p>dict: A dictionary where keys are unique values from the specified column, and values are lists of corresponding dictionaries.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="scheduler.handle.to_dict">
+<span class="sig-prename descclassname"><span class="pre">scheduler.handle.</span></span><span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nesting</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last_data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/handle.html#to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.handle.to_dict" title="Link to this definition"></a></dt>
+<dd><p>Convert a list of dictionaries into a nested dictionary structure based on specified nesting levels.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>data (list): The 2d list to be converted.
+nesting (list): A list of column names to use for nesting levels.
+last_data (dict): A dictionary specifying the last level of data to include.</p>
+</dd>
+<dt>Returns:</dt><dd><p>dict: A nested dictionary structure representing the data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-scheduler.read">
+<span id="scheduler-read-module"></span><h2>scheduler.read module<a class="headerlink" href="#module-scheduler.read" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="scheduler.read.AbsoluteReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scheduler.read.</span></span><span class="sig-name descname"><span class="pre">AbsoluteReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#AbsoluteReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.AbsoluteReader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scheduler.read.Reader" title="scheduler.read.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a></p>
+<p>A class for reading schedule data from files of various formats, determining the format based on file extension.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>path (str): The path to the data file.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.read.AbsoluteReader.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#AbsoluteReader.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.AbsoluteReader.read" title="Link to this definition"></a></dt>
+<dd><p>Read schedule data from a data file, determining its format based on the file extension.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>list: The read schedule data in a structured format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scheduler.read.DOCReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scheduler.read.</span></span><span class="sig-name descname"><span class="pre">DOCReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#DOCReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.DOCReader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scheduler.read.Reader" title="scheduler.read.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a></p>
+<p>A class for reading schedule data from DOC files.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>path (str): The path to the DOC file.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.read.DOCReader.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#DOCReader.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.DOCReader.read" title="Link to this definition"></a></dt>
+<dd><p>Read schedule data from a DOC file.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>list: The read schedule data in a structured format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scheduler.read.DOCXReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scheduler.read.</span></span><span class="sig-name descname"><span class="pre">DOCXReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#DOCXReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.DOCXReader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scheduler.read.Reader" title="scheduler.read.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a></p>
+<p>A class for reading schedule data from DOCX files.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>path (str): The path to the DOCX file.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.read.DOCXReader.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#DOCXReader.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.DOCXReader.read" title="Link to this definition"></a></dt>
+<dd><p>Read data from a DOCX file.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>list: The read schedule data in a structured format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scheduler.read.Reader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scheduler.read.</span></span><span class="sig-name descname"><span class="pre">Reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#Reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.Reader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Abstract base class for data readers.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>path (str): The path to the data file.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.read.Reader.read">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#Reader.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.Reader.read" title="Link to this definition"></a></dt>
+<dd><p>Abstract method for reading data from a file.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>list: The read schedule data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="scheduler.read.XLSXReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">scheduler.read.</span></span><span class="sig-name descname"><span class="pre">XLSXReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#XLSXReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.XLSXReader" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#scheduler.read.Reader" title="scheduler.read.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a></p>
+<p>A class for reading schedule data from XLSX files.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>path (str): The path to the XLSX file.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.read.XLSXReader.get_cell_val">
+<span class="sig-name descname"><span class="pre">get_cell_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#XLSXReader.get_cell_val"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.XLSXReader.get_cell_val" title="Link to this definition"></a></dt>
+<dd><p>Get the value of a cell or the value from a merged cell.</p>
+<dl>
+<dt>Parameters:</dt><dd><p>cell: The cell to retrieve the value from.</p>
+<p>default: The default value to return if the cell is empty or not found.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Any: The cell’s value or the value from a merged cell if applicable, or the default value.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.read.XLSXReader.get_nearest_up_cell_val">
+<span class="sig-name descname"><span class="pre">get_nearest_up_cell_val</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cell</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#XLSXReader.get_nearest_up_cell_val"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.XLSXReader.get_nearest_up_cell_val" title="Link to this definition"></a></dt>
+<dd><p>Get the value of the nearest cell above the given cell.</p>
+<dl>
+<dt>Parameters:</dt><dd><p>cell: The cell to start searching from.</p>
+<p>default: The default value to return if no value is found.</p>
+</dd>
+<dt>Returns:</dt><dd><p>Any: The value of the nearest cell above or the default value if not found.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.read.XLSXReader.get_schedule_rows_range">
+<span class="sig-name descname"><span class="pre">get_schedule_rows_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ws</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#XLSXReader.get_schedule_rows_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.XLSXReader.get_schedule_rows_range" title="Link to this definition"></a></dt>
+<dd><p>Get the range of rows containing schedule information in the worksheet.</p>
+<dl class="simple">
+<dt>Parameters:</dt><dd><p>ws: The worksheet to search for schedule rows.</p>
+</dd>
+<dt>Returns:</dt><dd><p>tuple: A tuple containing the first and last row indices of the schedule rows.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="scheduler.read.XLSXReader.read">
+<span class="sig-name descname"><span class="pre">read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/read.html#XLSXReader.read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.read.XLSXReader.read" title="Link to this definition"></a></dt>
+<dd><p>Read data from an XLSX file.</p>
+<dl class="simple">
+<dt>Returns:</dt><dd><p>list: The read schedule data in a structured format.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-scheduler.to_json">
+<span id="scheduler-to-json-module"></span><h2>scheduler.to_json module<a class="headerlink" href="#module-scheduler.to_json" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="scheduler.to_json.file_to_json">
+<span class="sig-prename descclassname"><span class="pre">scheduler.to_json.</span></span><span class="sig-name descname"><span class="pre">file_to_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">json_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'data.json'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fen_mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fen_spec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/scheduler/to_json.html#file_to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#scheduler.to_json.file_to_json" title="Link to this definition"></a></dt>
+<dd><p>Read schedule from a file, process it, and save it as JSON.</p>
+<dl>
+<dt>Parameters:</dt><dd><p>data_path (str): The path to the input data file.</p>
+<p>json_path (str): The path to the output JSON file. Default is “data.json”.</p>
+<p>fen_mode (bool): Whether to operate in FEN mode. Default is False.</p>
+<p>fen_spec (str): The specialization (required if in FEN mode). One of [“мен”,”фін”, “екон”, “мар”, “рб”].</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-scheduler">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-scheduler" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Welcome to UKMA_schedule_file_scraper’s documentation!" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Misha Oborin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

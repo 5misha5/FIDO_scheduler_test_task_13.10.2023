@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scheduler.handle &mdash; UKMA_schedule_file_scraper 1.0.0 documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            UKMA_schedule_file_scraper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../scheduler.html">scheduler package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">UKMA_schedule_file_scraper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">scheduler.handle</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for scheduler.handle</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">Levenshtein</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="kn">import</span> <span class="nn">scheduler.cols</span> <span class="k">as</span> <span class="nn">cols</span>
+
+<div class="viewcode-block" id="group_by">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.group_by">[docs]</a>
+<span class="k">def</span> <span class="nf">group_by</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">column</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Group a list of dictionaries based on a specified column.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        data (list): The 2d list to be grouped.</span>
+<span class="sd">        column (str): The column index by which to group the data.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A dictionary where keys are unique values from the specified column, and values are lists of corresponding dictionaries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">grouped</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[])</span>
+    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="n">grouped</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="n">column</span><span class="p">]]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">grouped</span></div>
+
+
+<div class="viewcode-block" id="to_dict">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.to_dict">[docs]</a>
+<span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">nesting</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">last_data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a list of dictionaries into a nested dictionary structure based on specified nesting levels.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        data (list): The 2d list to be converted.</span>
+<span class="sd">        nesting (list): A list of column names to use for nesting levels.</span>
+<span class="sd">        last_data (dict): A dictionary specifying the last level of data to include.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: A nested dictionary structure representing the data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nesting</span><span class="p">:</span>
+        <span class="n">last_data_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">last_data_list</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="n">key</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="n">item</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">last_data</span><span class="o">.</span><span class="n">items</span><span class="p">()})</span>
+
+        <span class="k">return</span> <span class="n">last_data_list</span>
+
+    <span class="n">data_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">group_by</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">column</span><span class="o">=</span><span class="n">nesting</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">nesting</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">last_data</span><span class="o">=</span><span class="n">last_data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">data_dict</span></div>
+
+
+
+<div class="viewcode-block" id="Handler">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.Handler">[docs]</a>
+<span class="k">class</span> <span class="nc">Handler</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for handling and processing data.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        data (list): The input data to be processed.</span>
+
+<span class="sd">        fen_mode (bool): Whether to operate in FEN mode.</span>
+
+<span class="sd">        spec (str): The specialization (required if in FEN mode). One of [&quot;мен&quot;,&quot;фін&quot;, &quot;екон&quot;, &quot;мар&quot;, &quot;рб&quot;].</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        data (list): The data to be processed.</span>
+
+<span class="sd">        fen_mode (bool): Whether the class operates in FEN mode.</span>
+
+<span class="sd">        spec (str): The specialization to filter data for (only relevant in FEN mode).  One of [&quot;мен&quot;,&quot;фін&quot;, &quot;екон&quot;, &quot;мар&quot;, &quot;рб&quot;].</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        remove_without_course(self):</span>
+<span class="sd">            Remove rows with missing or empty course information.</span>
+
+<span class="sd">        remove_none(self):</span>
+<span class="sd">            Remove empty or whitespace values in the data.</span>
+
+<span class="sd">        day_of_week_to_normal(self, day_of_week: str):</span>
+<span class="sd">            Convert a day of the week to its normalized form.</span>
+
+<span class="sd">        weeks_to_list(self, weeks: str):</span>
+<span class="sd">            Convert a string of weeks to a list of integers.</span>
+
+<span class="sd">        groups_to_list(self, groups: str):</span>
+<span class="sd">            Convert a string of groups to a list of group names.</span>
+
+<span class="sd">        split_groups(self):</span>
+<span class="sd">            Split rows with multiple groups into separate rows.</span>
+
+<span class="sd">        handle_by_column(self, column, function):</span>
+<span class="sd">            Apply a function to a specific column in the data.</span>
+
+<span class="sd">        handle(self, fen_mode: bool = False, spec: str = None):</span>
+<span class="sd">            Main data processing routine, including various data transformations.</span>
+<span class="sd">            If in FEN mode, it filters the data based on the provided specialization.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="nb">list</span><span class="p">,</span> <span class="n">fen_mode</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">spec</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a Handler instance.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            data (list): The input data to be processed.</span>
+
+<span class="sd">            fen_mode (bool): Whether to operate in FEN mode.</span>
+
+<span class="sd">            spec (str): The specialization (required if in FEN mode).  One of [&quot;мен&quot;,&quot;фін&quot;, &quot;екон&quot;, &quot;мар&quot;, &quot;рб&quot;].</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fen_mode</span> <span class="o">=</span> <span class="n">fen_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
+
+<div class="viewcode-block" id="Handler.remove_without_course">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.Handler.remove_without_course">[docs]</a>
+    <span class="k">def</span> <span class="nf">remove_without_course</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove rows with missing or empty course information.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data_copy</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">((</span><span class="ow">not</span> <span class="n">row</span><span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">COURSE</span><span class="p">])</span> <span class="ow">or</span> <span class="n">row</span><span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">COURSE</span><span class="p">]</span><span class="o">.</span><span class="n">isspace</span><span class="p">()):</span>
+                <span class="n">data_copy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data_copy</span></div>
+
+
+<div class="viewcode-block" id="Handler.remove_none">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.Handler.remove_none">[docs]</a>
+    <span class="k">def</span> <span class="nf">remove_none</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove empty or whitespace values in the data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="ow">not</span> <span class="n">col</span><span class="p">)</span> <span class="ow">or</span> <span class="n">col</span><span class="o">.</span><span class="n">isspace</span><span class="p">():</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
+
+
+<div class="viewcode-block" id="Handler.day_of_week_to_normal">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.Handler.day_of_week_to_normal">[docs]</a>
+    <span class="k">def</span> <span class="nf">day_of_week_to_normal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">day_of_week</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a day of the week to its normalized form.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            day_of_week (str): The original day of the week.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: The normalized day of the week.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">days_of_week</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;Понеділок&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;Вівторок&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;Середа&quot;</span><span class="p">,</span> 
+            <span class="s2">&quot;Четвер&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;П&#39;ятниця&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Субота&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Неділя&quot;</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">days_of_week</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">day</span><span class="p">:</span> <span class="n">Levenshtein</span><span class="o">.</span><span class="n">ratio</span><span class="p">(</span><span class="n">day_of_week</span><span class="o">.</span><span class="n">capitalize</span><span class="p">(),</span> <span class="n">day</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Handler.weeks_to_list">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.Handler.weeks_to_list">[docs]</a>
+    <span class="k">def</span> <span class="nf">weeks_to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">weeks</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a string of weeks to a list of integers.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            weeks (str): The string representing weeks.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list of int: A list of week numbers.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">int_arr</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\D+&#39;</span><span class="p">,</span> <span class="n">weeks</span><span class="p">))))</span>
+        <span class="n">del_arr</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">weeks</span><span class="p">)</span>
+
+        <span class="n">weeks_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+        <span class="n">is_range</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">week</span><span class="p">,</span> <span class="n">delim</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">int_arr</span><span class="p">)),</span> <span class="n">int_arr</span><span class="p">,</span> <span class="n">del_arr</span><span class="p">[</span><span class="mi">1</span><span class="p">:]):</span>
+            <span class="k">if</span> <span class="n">is_range</span><span class="p">:</span>
+                <span class="n">weeks_set</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">int_arr</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">week</span><span class="o">+</span><span class="mi">1</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">weeks_set</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">week</span><span class="p">)</span>
+            
+            <span class="n">is_range</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span> <span class="ow">in</span> <span class="n">delim</span>
+        
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">weeks_set</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Handler.groups_to_list">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.Handler.groups_to_list">[docs]</a>
+    <span class="k">def</span> <span class="nf">groups_to_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">groups</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a string of groups to a list of group names.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            groups (str): The string representing groups.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list of str: A list of group names.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">delimeters</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">punctuation</span><span class="p">)</span><span class="o">-</span><span class="p">{</span><span class="s2">&quot;-&quot;</span><span class="p">})</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s2">&quot; &quot;</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">delimeters</span> <span class="k">else</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">])</span><span class="o">.</span><span class="n">split</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="Handler.split_groups">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.Handler.split_groups">[docs]</a>
+    <span class="k">def</span> <span class="nf">split_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Split rows with multiple groups into separate rows.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">row</span><span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">GROUPS</span><span class="p">]:</span>
+                <span class="n">new_row</span> <span class="o">=</span> <span class="n">row</span><span class="p">[:]</span>
+                <span class="n">new_row</span><span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">GROUPS</span><span class="p">]</span> <span class="o">=</span> <span class="n">group</span>
+                <span class="n">new_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_row</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">new_data</span></div>
+
+
+<div class="viewcode-block" id="Handler.handle_by_column">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.Handler.handle_by_column">[docs]</a>
+    <span class="k">def</span> <span class="nf">handle_by_column</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">function</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply a function to a specific column in the data.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            column (int): The column index to process.</span>
+
+<span class="sd">            function (function): The function to apply to the column.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">column</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="Handler.handle">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.Handler.handle">[docs]</a>
+    <span class="k">def</span> <span class="nf">handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fen_mode</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span><span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Main data processing routine, including various data transformations.</span>
+<span class="sd">        If in FEN mode, it filters the data based on the provided specialization.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            fen_mode (bool): Whether to operate in FEN mode.</span>
+
+<span class="sd">            spec (str): The specialization (required if in FEN mode).  One of [&quot;мен&quot;,&quot;фін&quot;, &quot;екон&quot;, &quot;мар&quot;, &quot;рб&quot;].</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_without_course</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_none</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle_by_column</span><span class="p">(</span><span class="n">cols</span><span class="o">.</span><span class="n">DAYS_OF_WEEKS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">day_of_week_to_normal</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle_by_column</span><span class="p">(</span><span class="n">cols</span><span class="o">.</span><span class="n">WEEKS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">weeks_to_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">handle_by_column</span><span class="p">(</span><span class="n">cols</span><span class="o">.</span><span class="n">GROUPS</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">groups_to_list</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">split_groups</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fen_mode</span><span class="p">:</span>
+            <span class="n">fen_filter</span> <span class="o">=</span> <span class="n">FENFilter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">fen_filter</span><span class="o">.</span><span class="n">FEN_SPEC_CUT</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;Parameter &quot;spec&quot; must be one of </span><span class="si">{fen_spec}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">fen_spec</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fen_filter</span><span class="o">.</span><span class="n">FEN_SPEC_CUT</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">fen_filter</span><span class="o">.</span><span class="n">filter_spec</span><span class="p">()</span></div>
+</div>
+
+
+<div class="viewcode-block" id="FENFilter">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.FENFilter">[docs]</a>
+<span class="k">class</span> <span class="nc">FENFilter</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A class for filtering data based on specified criteria.</span>
+
+<span class="sd">    Parameters:</span>
+<span class="sd">        data (list): A 2d list of data to be filtered.</span>
+
+<span class="sd">        spec (str): The specialization to filter data for.  One of [&quot;мен&quot;,&quot;фін&quot;, &quot;екон&quot;, &quot;мар&quot;, &quot;рб&quot;].</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        data (list): The input data to be filtered.</span>
+
+<span class="sd">        spec (str): The specialization to filter data for.  One of [&quot;мен&quot;,&quot;фін&quot;, &quot;екон&quot;, &quot;мар&quot;, &quot;рб&quot;].</span>
+
+<span class="sd">        FEN_SPEC_CUT (set): A set of abbreviation names for specializations.</span>
+
+<span class="sd">        FEN_SPEC (dict): A dictionary mapping specialization names to abbreviations.</span>
+
+<span class="sd">    Methods:</span>
+<span class="sd">        filter_spec(self):</span>
+<span class="sd">            Filter the data based on the provided specialization.</span>
+
+<span class="sd">        is_spec_appropriate(self, spec_data):</span>
+<span class="sd">            Check if a specific data entry is appropriate for the given specialization.</span>
+
+<span class="sd">        spec_name(self, word):</span>
+<span class="sd">            Find the specialization abbreviation for a given word.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize a FENFilter instance.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            data (list): A 2d list of data to be filtered.</span>
+<span class="sd">            </span>
+<span class="sd">            spec (str): The specialization to filter data for.  One of [&quot;мен&quot;,&quot;фін&quot;, &quot;екон&quot;, &quot;мар&quot;, &quot;рб&quot;].</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">spec</span> <span class="o">=</span> <span class="n">spec</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">FEN_SPEC_CUT</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;мен&quot;</span><span class="p">,</span><span class="s2">&quot;фін&quot;</span><span class="p">,</span> <span class="s2">&quot;екон&quot;</span><span class="p">,</span> <span class="s2">&quot;мар&quot;</span><span class="p">,</span> <span class="s2">&quot;рб&quot;</span><span class="p">}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">FEN_SPEC</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;менеджмент&quot;</span><span class="p">:</span> <span class="s2">&quot;мен&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;фінанси&quot;</span><span class="p">:</span> <span class="s2">&quot;фін&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;економіка&quot;</span><span class="p">:</span> <span class="s2">&quot;екон&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;маркетинг&quot;</span><span class="p">:</span> <span class="s2">&quot;мар&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;розвиток&quot;</span><span class="p">:</span> <span class="s2">&quot;рб&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;рб&quot;</span><span class="p">:</span> <span class="s2">&quot;рб&quot;</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="FENFilter.filter_spec">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.FENFilter.filter_spec">[docs]</a>
+    <span class="k">def</span> <span class="nf">filter_spec</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Filter the data based on the provided specialization.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: A filtered 2d list of data entries.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_spec_appropriate</span><span class="p">(</span><span class="n">x</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">))</span></div>
+
+    
+<div class="viewcode-block" id="FENFilter.is_spec_appropriate">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.FENFilter.is_spec_appropriate">[docs]</a>
+    <span class="k">def</span> <span class="nf">is_spec_appropriate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spec_data</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if a specific data entry is appropriate for the given specialization.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            spec_data (list): Data entry to be checked.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if the data entry is appropriate, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec</span>
+
+        <span class="n">course</span> <span class="o">=</span> <span class="n">spec_data</span><span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">COURSE</span><span class="p">]</span>
+        <span class="n">group</span> <span class="o">=</span> <span class="n">spec_data</span><span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">GROUPS</span><span class="p">]</span>
+        <span class="n">brackets</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\(.*?\)&#39;</span><span class="p">,</span> <span class="n">course</span><span class="p">)))</span>
+        
+        <span class="n">group_words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">group</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="nb">str</span><span class="o">.</span><span class="n">isalpha</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">group_w</span> <span class="ow">in</span> <span class="n">group_words</span><span class="p">:</span>
+            <span class="n">group_spec_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spec_name</span><span class="p">(</span><span class="n">group_w</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">group_spec_name</span> <span class="o">==</span> <span class="n">spec</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">group_spec_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">FEN_SPEC_CUT</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+
+
+        <span class="k">for</span> <span class="n">brack_w</span> <span class="ow">in</span> <span class="n">brackets</span><span class="p">:</span>
+            <span class="n">words</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">w</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">w</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">brack_w</span><span class="p">,</span> <span class="nb">str</span><span class="o">.</span><span class="n">isalpha</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">brack_spec_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spec_name</span><span class="p">,</span> <span class="n">words</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">brack_spec_names</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">brack_spec_names</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+    
+
+<div class="viewcode-block" id="FENFilter.spec_name">
+<a class="viewcode-back" href="../../scheduler.html#scheduler.handle.FENFilter.spec_name">[docs]</a>
+    <span class="k">def</span> <span class="nf">spec_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">word</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Find the specialization abbreviation for a given word</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">            word (str): The word to be matched with specialization names.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str or None: The abbreviation of the specialization if found, or None if not found.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">app_word</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">app_word_l_dist</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">spec</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">FEN_SPEC</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">word</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">):</span>
+                <span class="n">l_dist</span> <span class="o">=</span> <span class="n">Levenshtein</span><span class="o">.</span><span class="n">ratio</span><span class="p">(</span><span class="n">spec</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">word</span><span class="p">)]</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">word</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">l_dist</span> <span class="o">&gt;</span> <span class="mf">0.6</span> <span class="ow">and</span> <span class="n">l_dist</span><span class="o">&gt;</span><span class="n">app_word_l_dist</span><span class="p">:</span>
+                    <span class="n">app_word_l_dist</span> <span class="o">=</span> <span class="n">l_dist</span>
+                    <span class="n">app_word</span> <span class="o">=</span> <span class="n">spec</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">FEN_SPEC</span><span class="p">[</span><span class="n">app_word</span><span class="p">]</span> <span class="k">if</span> <span class="n">app_word</span> <span class="k">else</span> <span class="kc">None</span></div>
+</div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">read</span> <span class="kn">import</span> <span class="o">*</span>
+
+    <span class="kn">from</span> <span class="nn">pprint</span> <span class="kn">import</span> <span class="n">pprint</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+    <span class="n">handler</span> <span class="o">=</span> <span class="n">Handler</span><span class="p">(</span><span class="n">AbsoluteReader</span><span class="p">(</span><span class="s2">&quot;./files\Економіка_БП-3_Осінь_2023–2024.doc&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span>
+                               <span class="n">fen_mode</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                               <span class="n">spec</span><span class="o">=</span><span class="s2">&quot;екон&quot;</span><span class="p">)</span>
+    <span class="n">handler</span><span class="o">.</span><span class="n">handle</span><span class="p">()</span>
+    <span class="n">schedule</span> <span class="o">=</span> <span class="n">to_dict</span><span class="p">(</span><span class="n">handler</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="p">[</span><span class="n">cols</span><span class="o">.</span><span class="n">COURSE</span><span class="p">,</span> <span class="n">cols</span><span class="o">.</span><span class="n">GROUPS</span><span class="p">,</span> <span class="n">cols</span><span class="o">.</span><span class="n">DAYS_OF_WEEKS</span><span class="p">],</span> <span class="p">{</span><span class="s2">&quot;час&quot;</span><span class="p">:</span> <span class="n">cols</span><span class="o">.</span><span class="n">TIME</span><span class="p">,</span> 
+                                                                       <span class="s2">&quot;аудиторія&quot;</span><span class="p">:</span> <span class="n">cols</span><span class="o">.</span><span class="n">LECT_HALL</span><span class="p">,</span> 
+                                                                       <span class="s2">&quot;тижні&quot;</span><span class="p">:</span> <span class="n">cols</span><span class="o">.</span><span class="n">WEEKS</span><span class="p">})</span>
+    
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;data.json&quot;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">schedule</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">ensure_ascii</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+
+    
+
+    <span class="c1"># schedule = remove_none((remove_without_course(read_docx(&quot;./files/doc/3.docx&quot;))))</span>
+    <span class="c1"># my_array = np.array(schedule)</span>
+    
+    <span class="c1"># handler = Handler(AbsoluteReader(&quot;./files\Економіка_БП-3_Осінь_2023–2024.doc&quot;).read(),</span>
+    <span class="c1">#                            fen_mode=True,</span>
+    <span class="c1">#                            spec=&quot;екон&quot;)</span>
+    <span class="c1"># handler.handle()</span>
+    <span class="c1"># schedule = handler.data</span>
+    <span class="c1"># my_array = np.array(list(map(lambda x: list(map(str, x)),schedule)))</span>
+    
+
+    <span class="c1"># df = pd.DataFrame(my_array, columns = [&#39;День&#39;,&#39;Час&#39;,&#39;Дисципліна, викладач&#39;, &quot;Група&quot;, &quot;Тижні&quot;, &quot;Аудиторія&quot;])</span>
+
+
+    <span class="c1"># print(df.to_markdown())</span>
+    <span class="c1"># print()</span>
+    <span class="c1"># print()</span>
+
+    <span class="c1">#!</span>
+
+    <span class="c1"># schedule = group_by(handle(read_docx(&quot;./files/doc/3.docx&quot;), </span>
+    <span class="c1">#                            fen_mode=True,</span>
+    <span class="c1">#                            spec=&quot;екон&quot;),cols.COURSE)</span>
+    
+    <span class="c1"># for key,item in schedule.items():</span>
+    <span class="c1">#     my_array = np.array(list(map(lambda x: list(map(str, x)),item)))</span>
+
+    <span class="c1">#     df = pd.DataFrame(my_array, columns = [&#39;День&#39;,&#39;Час&#39;,&#39;Дисципліна, викладач&#39;, &quot;Група&quot;, &quot;Тижні&quot;, &quot;Аудиторія&quot;])</span>
+
+    <span class="c1">#     print(key)</span>
+    <span class="c1">#     print(df.to_markdown())</span>
+    <span class="c1">#     print()</span>
+    <span class="c1">#     print()</span>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Misha Oborin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

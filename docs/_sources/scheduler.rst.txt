@@ -1,0 +1,45 @@
+scheduler package
+=================
+
+Submodules
+----------
+
+scheduler.cols module
+---------------------
+
+.. automodule:: scheduler.cols
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scheduler.handle module
+-----------------------
+
+.. automodule:: scheduler.handle
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scheduler.read module
+---------------------
+
+.. automodule:: scheduler.read
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+scheduler.to\_json module
+-------------------------
+
+.. automodule:: scheduler.to_json
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: scheduler
+   :members:
+   :undoc-members:
+   :show-inheritance:

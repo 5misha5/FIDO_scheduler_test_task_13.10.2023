@@ -190,7 +190,7 @@ class Handler():
         Returns:
             list of str: A list of group names.
         """
-        delimeters = "".join(set(string.punctuation)-{"-"})
+        delimeters = "".join(set(string.punctuation)-{"-()"})
         return list("".join([" " if i in delimeters else i for i in groups]).split())
 
     def split_groups(self):
@@ -278,7 +278,7 @@ class FENFilter():
 
         Parameters:
             data (list): A 2d list of data to be filtered.
-            
+
             spec (str): The specialization to filter data for.  One of ["мен","фін", "екон", "мар", "рб"].
 
         """

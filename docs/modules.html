@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scheduler &mdash; UKMA_schedule_file_scraper 1.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            UKMA_schedule_file_scraper
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="scheduler.html">scheduler package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">UKMA_schedule_file_scraper</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">scheduler</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/modules.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="scheduler">
+<h1>scheduler<a class="headerlink" href="#scheduler" title="Link to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="scheduler.html">scheduler package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="scheduler.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scheduler.html#module-scheduler.cols">scheduler.cols module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scheduler.html#module-scheduler.handle">scheduler.handle module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scheduler.html#scheduler.handle.FENFilter"><code class="docutils literal notranslate"><span class="pre">FENFilter</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.handle.FENFilter.filter_spec"><code class="docutils literal notranslate"><span class="pre">FENFilter.filter_spec()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.handle.FENFilter.is_spec_appropriate"><code class="docutils literal notranslate"><span class="pre">FENFilter.is_spec_appropriate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.handle.FENFilter.spec_name"><code class="docutils literal notranslate"><span class="pre">FENFilter.spec_name()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scheduler.html#scheduler.handle.Handler"><code class="docutils literal notranslate"><span class="pre">Handler</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.handle.Handler.day_of_week_to_normal"><code class="docutils literal notranslate"><span class="pre">Handler.day_of_week_to_normal()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.handle.Handler.groups_to_list"><code class="docutils literal notranslate"><span class="pre">Handler.groups_to_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.handle.Handler.handle"><code class="docutils literal notranslate"><span class="pre">Handler.handle()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.handle.Handler.handle_by_column"><code class="docutils literal notranslate"><span class="pre">Handler.handle_by_column()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.handle.Handler.remove_none"><code class="docutils literal notranslate"><span class="pre">Handler.remove_none()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.handle.Handler.remove_without_course"><code class="docutils literal notranslate"><span class="pre">Handler.remove_without_course()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.handle.Handler.split_groups"><code class="docutils literal notranslate"><span class="pre">Handler.split_groups()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.handle.Handler.weeks_to_list"><code class="docutils literal notranslate"><span class="pre">Handler.weeks_to_list()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scheduler.html#scheduler.handle.group_by"><code class="docutils literal notranslate"><span class="pre">group_by()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="scheduler.html#scheduler.handle.to_dict"><code class="docutils literal notranslate"><span class="pre">to_dict()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scheduler.html#module-scheduler.read">scheduler.read module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scheduler.html#scheduler.read.AbsoluteReader"><code class="docutils literal notranslate"><span class="pre">AbsoluteReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.read.AbsoluteReader.read"><code class="docutils literal notranslate"><span class="pre">AbsoluteReader.read()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scheduler.html#scheduler.read.DOCReader"><code class="docutils literal notranslate"><span class="pre">DOCReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.read.DOCReader.read"><code class="docutils literal notranslate"><span class="pre">DOCReader.read()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scheduler.html#scheduler.read.DOCXReader"><code class="docutils literal notranslate"><span class="pre">DOCXReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.read.DOCXReader.read"><code class="docutils literal notranslate"><span class="pre">DOCXReader.read()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scheduler.html#scheduler.read.Reader"><code class="docutils literal notranslate"><span class="pre">Reader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.read.Reader.read"><code class="docutils literal notranslate"><span class="pre">Reader.read()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="scheduler.html#scheduler.read.XLSXReader"><code class="docutils literal notranslate"><span class="pre">XLSXReader</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.read.XLSXReader.get_cell_val"><code class="docutils literal notranslate"><span class="pre">XLSXReader.get_cell_val()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.read.XLSXReader.get_nearest_up_cell_val"><code class="docutils literal notranslate"><span class="pre">XLSXReader.get_nearest_up_cell_val()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.read.XLSXReader.get_schedule_rows_range"><code class="docutils literal notranslate"><span class="pre">XLSXReader.get_schedule_rows_range()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="scheduler.html#scheduler.read.XLSXReader.read"><code class="docutils literal notranslate"><span class="pre">XLSXReader.read()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scheduler.html#module-scheduler.to_json">scheduler.to_json module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="scheduler.html#scheduler.to_json.file_to_json"><code class="docutils literal notranslate"><span class="pre">file_to_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="scheduler.html#module-scheduler">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Misha Oborin.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

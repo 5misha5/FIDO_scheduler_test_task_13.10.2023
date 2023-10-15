@@ -163,4 +163,4 @@ cython_debug/
 files
 temp
 data.json
-docs
+doc
