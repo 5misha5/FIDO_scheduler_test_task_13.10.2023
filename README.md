@@ -52,3 +52,5 @@ scheduler.to_json.file_to_json(data_path, json_path, fen_mode = True, spec = spe
 ```
 Якщо потрібно отримати інформацію про весь факультет - запустіть функцію змінюючи spec
 
+Для детальнішої інформації читайте docs
+
