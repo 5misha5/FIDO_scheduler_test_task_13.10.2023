@@ -54,6 +54,8 @@ class TestWeeksToArray(unittest.TestCase):
 
 # TODO add groups_to_set tests
 
+#TODO spec_name tests
+
 
 if __name__ == '__main__':
     unittest.main()

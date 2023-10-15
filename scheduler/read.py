@@ -77,19 +77,13 @@ def read_excel(path):
                 row_data.append(get_nearest_up_cell_val(row[col]))
             else:
                 cell_val = get_cell_val(row[col])
-                if col == 2 and not cell_val:
-                    break
+
                 row_data.append(str(get_cell_val(row[col])))
-        else:
-            schedule.append(row_data)
+
+        schedule.append(row_data)
 
     return schedule
 
-def read_docx(path):
-    ...
-
-def read_doc(path):
-    ...
 
 
 
@@ -110,5 +104,5 @@ if __name__ == "__main__":
 
     df = pd.DataFrame(my_array, columns = ['День','Час','Дисципліна, викладач', "Група", "Тижні", "Аудиторія"])
 
-    print(df.to_string())
+    print(df.to_markdown())
     #pprint(schedule)
