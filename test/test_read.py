@@ -11,8 +11,6 @@ if os.path.exists(scheduler_directory):
 else:
     print(f"The directory '{scheduler_directory}' does not exist.")
 
-# Now, you can import modules from the 'scheduler' package
-
 
 from scheduler.read import AbsoluteReader
 import numpy as np

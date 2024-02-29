@@ -11,14 +11,13 @@ if os.path.exists(scheduler_directory):
 else:
     print(f"The directory '{scheduler_directory}' does not exist.")
 
-# Now, you can import modules from the 'scheduler' package
-
 
 from scheduler.handle import *
 from scheduler.read import *
+from scheduler.cols import *
 import numpy as np
 
-FILES_PATH = "./files/"
+FILES_PATH = "/files/"
 
 class TestWeeksToArray(unittest.TestCase, Handler):
 

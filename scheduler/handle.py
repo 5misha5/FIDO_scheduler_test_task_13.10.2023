@@ -7,6 +7,7 @@ import itertools
 
 import scheduler.cols as cols
 
+
 def group_by(data, column):
     """
     Group a list of dictionaries based on a specified column.
@@ -23,6 +24,7 @@ def group_by(data, column):
         grouped[row[column]].append(row)
 
     return grouped
+
 
 def to_dict(data, nesting: list, last_data: dict):
     """
@@ -96,7 +98,7 @@ class Handler():
 
     """
 
-    def __init__(self, data:list, fen_mode: bool = False, spec=None) -> None:
+    def __init__(self, data: list, fen_mode: bool = False, spec=None) -> None:
         """
         Initialize a Handler instance.
 
@@ -143,9 +145,9 @@ class Handler():
             str: The normalized day of the week.
         """
         days_of_week = {
-            "Понеділок", 
-            "Вівторок", 
-            "Середа", 
+            "Понеділок",
+            "Вівторок",
+            "Середа",
             "Четвер",
             "П'ятниця",
             "Субота",
@@ -170,14 +172,14 @@ class Handler():
         weeks_set = set()
 
         is_range = False
-        for i,week, delim in zip(range(len(int_arr)), int_arr, del_arr[1:]):
+        for i, week, delim in zip(range(len(int_arr)), int_arr, del_arr[1:]):
             if is_range:
-                weeks_set.update(set(range(int_arr[i-1], week+1)))
+                weeks_set.update(set(range(int_arr[i - 1], week + 1)))
             else:
                 weeks_set.add(week)
-            
+
             is_range = "-" in delim
-        
+
         return list(weeks_set)
 
     def groups_to_list(self, groups: str):
@@ -190,7 +192,7 @@ class Handler():
         Returns:
             list of str: A list of group names.
         """
-        delimeters = "".join(set(string.punctuation)-{"-()"})
+        delimeters = "".join(set(string.punctuation) - {"-()"})
         return list("".join([" " if i in delimeters else i for i in groups]).split())
 
     def split_groups(self):
@@ -216,9 +218,9 @@ class Handler():
             function (function): The function to apply to the column.
         """
         for i, row in enumerate(self.data):
-                self.data[i][column] = function(self.data[i][column])
+            self.data[i][column] = function(self.data[i][column])
 
-    def handle(self, fen_mode:bool = False, spec:str = None):
+    def handle(self, fen_mode: bool = False, spec: str = None):
         """
         Main data processing routine, including various data transformations.
         If in FEN mode, it filters the data based on the provided specialization.
@@ -233,14 +235,16 @@ class Handler():
         self.remove_none()
         self.handle_by_column(cols.DAYS_OF_WEEKS, self.day_of_week_to_normal)
         self.handle_by_column(cols.WEEKS, self.weeks_to_list)
-        self.handle_by_column(cols.GROUPS, self.groups_to_list)
-        self.split_groups()
+        # self.handle_by_column(cols.GROUPS, self.groups_to_list)
+        # self.split_groups()
 
         if self.fen_mode:
             fen_filter = FENFilter(self.data, self.spec)
             if self.spec not in fen_filter.FEN_SPEC_CUT:
-                raise Exception('Parameter "spec" must be one of {fen_spec}'.format(fen_spec = list(fen_filter.FEN_SPEC_CUT)))
+                raise Exception(
+                    'Parameter "spec" must be one of {fen_spec}'.format(fen_spec=list(fen_filter.FEN_SPEC_CUT)))
             self.data = fen_filter.filter_spec()
+
 
 class FENFilter():
     """
@@ -285,7 +289,7 @@ class FENFilter():
         self.data = data
         self.spec = spec
 
-        self.FEN_SPEC_CUT = {"мен","фін", "екон", "мар", "рб"}
+        self.FEN_SPEC_CUT = {"мен", "фін", "екон", "мар", "рб"}
         self.FEN_SPEC = {
             "менеджмент": "мен",
             "фінанси": "фін",
@@ -304,7 +308,7 @@ class FENFilter():
 
         """
         return list(filter(lambda x: self.is_spec_appropriate(x), self.data))
-    
+
     def is_spec_appropriate(self, spec_data: list):
         """
         Check if a specific data entry is appropriate for the given specialization.
@@ -321,7 +325,7 @@ class FENFilter():
         course = spec_data[cols.COURSE]
         group = spec_data[cols.GROUPS]
         brackets = list(map(lambda x: x[1:-1], re.findall(r'\(.*?\)', course)))
-        
+
         group_words = ["".join(group) for key, group in itertools.groupby(group, str.isalpha) if key]
 
         for group_w in group_words:
@@ -331,8 +335,6 @@ class FENFilter():
             elif group_spec_name in self.FEN_SPEC_CUT:
                 return False
 
-
-
         for brack_w in brackets:
             words = ["".join(w) for key, w in itertools.groupby(brack_w, str.isalpha) if key]
             brack_spec_names = set(map(self.spec_name, words))
@@ -340,8 +342,7 @@ class FENFilter():
             if all(brack_spec_names):
                 if spec in brack_spec_names:
                     return True
-        return False
-    
+        return True
 
     def spec_name(self, word: str):
         """
@@ -360,10 +361,11 @@ class FENFilter():
         for spec in self.FEN_SPEC.keys():
             if word and len(spec) >= len(word):
                 l_dist = Levenshtein.ratio(spec[:len(word)].lower(), word.lower())
-                if l_dist > 0.6 and l_dist>app_word_l_dist:
+                if l_dist > 0.6 and l_dist > app_word_l_dist:
                     app_word_l_dist = l_dist
                     app_word = spec
         return self.FEN_SPEC[app_word] if app_word else None
+
 
 if __name__ == "__main__":
     from read import *
@@ -372,44 +374,40 @@ if __name__ == "__main__":
     import numpy as np
     import pandas as pd
 
-    handler = Handler(AbsoluteReader("./files\Економіка_БП-3_Осінь_2023–2024.doc").read(),
-                               fen_mode=True,
-                               spec="екон")
+    handler = Handler(AbsoluteReader("../files\Економіка_БП-3_Осінь_2023–2024.doc").read(),
+                      fen_mode=True,
+                      spec="фін")
     handler.handle()
-    schedule = to_dict(handler.data, [cols.COURSE, cols.GROUPS, cols.DAYS_OF_WEEKS], {"час": cols.TIME, 
-                                                                       "аудиторія": cols.LECT_HALL, 
-                                                                       "тижні": cols.WEEKS})
-    
+    pprint(handler.data)
+    schedule = to_dict(handler.data, [cols.COURSE, cols.GROUPS, cols.DAYS_OF_WEEKS], {"час": cols.TIME,
+                                                                                      "аудиторія": cols.LECT_HALL,
+                                                                                      "тижні": cols.WEEKS})
+
     with open("data.json", 'w', encoding='utf8') as json_file:
         json.dump(schedule, json_file, ensure_ascii=False, indent=4)
 
-
-    
-
     # schedule = remove_none((remove_without_course(read_docx("./files/doc/3.docx"))))
     # my_array = np.array(schedule)
-    
+
     # handler = Handler(AbsoluteReader("./files\Економіка_БП-3_Осінь_2023–2024.doc").read(),
     #                            fen_mode=True,
     #                            spec="екон")
     # handler.handle()
     # schedule = handler.data
     # my_array = np.array(list(map(lambda x: list(map(str, x)),schedule)))
-    
 
     # df = pd.DataFrame(my_array, columns = ['День','Час','Дисципліна, викладач', "Група", "Тижні", "Аудиторія"])
-
 
     # print(df.to_markdown())
     # print()
     # print()
 
-    #!
+    # !
 
     # schedule = group_by(handle(read_docx("./files/doc/3.docx"), 
     #                            fen_mode=True,
     #                            spec="екон"),cols.COURSE)
-    
+
     # for key,item in schedule.items():
     #     my_array = np.array(list(map(lambda x: list(map(str, x)),item)))
 
@@ -419,4 +417,3 @@ if __name__ == "__main__":
     #     print(df.to_markdown())
     #     print()
     #     print()
-
