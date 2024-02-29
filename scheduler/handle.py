@@ -119,12 +119,7 @@ class Handler():
         """
         Remove rows with missing or empty course information.
         """
-        # data_copy = []
-        # for row in self.data:
-        #     if not ((not row[cols.COURSE]) or row[cols.COURSE].isspace()):
-        #         data_copy.append(row)
-        #
-        # self.data = data_copy
+
         self.data.dropna(subset=['course_name, lector_name'], inplace=True)
         self.data = self.data[self.data["course_name, lector_name"].notna()]
         self.data = self.data[~self.data["course_name, lector_name"].str.isspace()]
@@ -133,10 +128,7 @@ class Handler():
         """
         Remove empty or whitespace values in the data.
         """
-        # for i, row in enumerate(self.data):
-        #     for j, col in enumerate(row):
-        #         if (not col) or col.isspace():
-        #             self.data[i][j] = ""
+
         self.data.fillna(replace_value, inplace=True)
         self.data.map(lambda x: replace_value if (not x) or x.isspace() else x)
 
@@ -187,31 +179,6 @@ class Handler():
             is_range = "-" in delim
 
         return list(weeks_set)
-
-    def groups_to_list(self, groups: str):
-        """
-        Convert a string of groups to a list of group names.
-
-        Parameters:
-            groups (str): The string representing groups.
-
-        Returns:
-            list of str: A list of group names.
-        """
-        delimeters = "".join(set(string.punctuation) - {"-()"})
-        return list("".join([" " if i in delimeters else i for i in groups]).split())
-
-    def handle_by_column(self, column, function):
-        """
-        Apply a function to a specific column in the data.
-
-        Parameters:
-            column (int): The column index to process.
-
-            function (function): The function to apply to the column.
-        """
-        for i, row in enumerate(self.data):
-            self.data[i][column] = function(self.data[i][column])
 
     def handle(self, fen_mode: bool = False, spec: str = None):
         """
