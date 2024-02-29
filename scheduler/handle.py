@@ -4,6 +4,7 @@ import string
 import json
 import Levenshtein
 import itertools
+import pandas as pd
 
 import scheduler.cols as cols
 
@@ -98,7 +99,7 @@ class Handler():
 
     """
 
-    def __init__(self, data: list, fen_mode: bool = False, spec=None) -> None:
+    def __init__(self, data: pd.DataFrame, fen_mode: bool = False, spec=None) -> None:
         """
         Initialize a Handler instance.
 
@@ -118,23 +119,28 @@ class Handler():
         """
         Remove rows with missing or empty course information.
         """
-        data_copy = []
-        for row in self.data:
-            if not ((not row[cols.COURSE]) or row[cols.COURSE].isspace()):
-                data_copy.append(row)
+        # data_copy = []
+        # for row in self.data:
+        #     if not ((not row[cols.COURSE]) or row[cols.COURSE].isspace()):
+        #         data_copy.append(row)
+        #
+        # self.data = data_copy
+        self.data.dropna(subset=['course_name, lector_name'], inplace=True)
+        self.data = self.data[self.data["course_name, lector_name"].notna()]
+        self.data = self.data[~self.data["course_name, lector_name"].str.isspace()]
 
-        self.data = data_copy
-
-    def remove_none(self):
+    def fill_empty(self, replace_value):
         """
         Remove empty or whitespace values in the data.
         """
-        for i, row in enumerate(self.data):
-            for j, col in enumerate(row):
-                if (not col) or col.isspace():
-                    self.data[i][j] = ""
+        # for i, row in enumerate(self.data):
+        #     for j, col in enumerate(row):
+        #         if (not col) or col.isspace():
+        #             self.data[i][j] = ""
+        self.data.fillna(replace_value, inplace=True)
+        self.data.map(lambda x: replace_value if (not x) or x.isspace() else x)
 
-    def day_of_week_to_normal(self, day_of_week: str):
+    def day_of_week_to_index(self, day_of_week: str):
         """
         Convert a day of the week to its normalized form.
 
@@ -144,7 +150,7 @@ class Handler():
         Returns:
             str: The normalized day of the week.
         """
-        days_of_week = {
+        days_of_week = [
             "Понеділок",
             "Вівторок",
             "Середа",
@@ -152,9 +158,9 @@ class Handler():
             "П'ятниця",
             "Субота",
             "Неділя"
-        }
+        ]
 
-        return max(days_of_week, key=lambda day: Levenshtein.ratio(day_of_week.capitalize(), day))
+        return days_of_week.index(max(days_of_week, key=lambda day: Levenshtein.ratio(day_of_week.capitalize(), day)))
 
     def weeks_to_list(self, weeks: str):
         """
@@ -195,19 +201,6 @@ class Handler():
         delimeters = "".join(set(string.punctuation) - {"-()"})
         return list("".join([" " if i in delimeters else i for i in groups]).split())
 
-    def split_groups(self):
-        """
-        Split rows with multiple groups into separate rows.
-        """
-        new_data = []
-        for row in self.data:
-            for group in row[cols.GROUPS]:
-                new_row = row[:]
-                new_row[cols.GROUPS] = group
-                new_data.append(new_row)
-
-        self.data = new_data
-
     def handle_by_column(self, column, function):
         """
         Apply a function to a specific column in the data.
@@ -232,11 +225,12 @@ class Handler():
 
         """
         self.remove_without_course()
-        self.remove_none()
-        self.handle_by_column(cols.DAYS_OF_WEEKS, self.day_of_week_to_normal)
-        self.handle_by_column(cols.WEEKS, self.weeks_to_list)
-        # self.handle_by_column(cols.GROUPS, self.groups_to_list)
-        # self.split_groups()
+        self.fill_empty(replace_value="")
+
+        self.data["day_of_week"] = self.data["day_of_week_name"].map(self.day_of_week_to_index)
+        self.data = self.data.drop('day_of_week_name', axis=1)
+
+        self.data["weeks"] = self.data["weeks"].map(self.weeks_to_list)
 
         if self.fen_mode:
             fen_filter = FENFilter(self.data, self.spec)
@@ -307,9 +301,9 @@ class FENFilter():
             list: A filtered 2d list of data entries.
 
         """
-        return list(filter(lambda x: self.is_spec_appropriate(x), self.data))
+        return self.data.loc[self.data.apply(lambda row: self.is_appropriate(row), axis=1)]
 
-    def is_spec_appropriate(self, spec_data: list):
+    def is_appropriate(self, row):
         """
         Check if a specific data entry is appropriate for the given specialization.
 
@@ -320,29 +314,35 @@ class FENFilter():
             bool: True if the data entry is appropriate, False otherwise.
 
         """
-        spec = self.spec
 
-        course = spec_data[cols.COURSE]
-        group = spec_data[cols.GROUPS]
-        brackets = list(map(lambda x: x[1:-1], re.findall(r'\(.*?\)', course)))
+        def is_course_appropriate(spec: str, course: str):
+            brackets = list(map(lambda x: x[1:-1], re.findall(r'\(.*?\)', course)))
+            for brack_w in brackets:
+                words = ["".join(w) for key, w in itertools.groupby(brack_w, str.isalpha) if key]
+                brack_spec_names = set(map(self.spec_name, words))
 
-        group_words = ["".join(group) for key, group in itertools.groupby(group, str.isalpha) if key]
+                if all(brack_spec_names):
+                    if spec in brack_spec_names:
+                        return True
+                    else:
+                        return False
 
-        for group_w in group_words:
-            group_spec_name = self.spec_name(group_w)
-            if group_spec_name == spec:
-                return True
-            elif group_spec_name in self.FEN_SPEC_CUT:
-                return False
+            return True
 
-        for brack_w in brackets:
-            words = ["".join(w) for key, w in itertools.groupby(brack_w, str.isalpha) if key]
-            brack_spec_names = set(map(self.spec_name, words))
+        def is_group_appropriate(spec: str, group: str):
 
-            if all(brack_spec_names):
-                if spec in brack_spec_names:
+            group_words = ["".join(group) for key, group in itertools.groupby(group, str.isalpha) if key]
+
+            for group_w in group_words:
+                group_spec_name = self.spec_name(group_w)
+                if group_spec_name == spec:
                     return True
-        return True
+                elif group_spec_name in self.FEN_SPEC_CUT:
+                    return False
+            return True
+
+        return is_course_appropriate(self.spec, row["course_name, lector_name"]) and \
+            is_group_appropriate(self.spec, row["group_name"])
 
     def spec_name(self, word: str):
         """
@@ -377,14 +377,17 @@ if __name__ == "__main__":
     handler = Handler(AbsoluteReader("../files\Економіка_БП-3_Осінь_2023–2024.doc").read(),
                       fen_mode=True,
                       spec="фін")
-    handler.handle()
-    pprint(handler.data)
-    schedule = to_dict(handler.data, [cols.COURSE, cols.GROUPS, cols.DAYS_OF_WEEKS], {"час": cols.TIME,
-                                                                                      "аудиторія": cols.LECT_HALL,
-                                                                                      "тижні": cols.WEEKS})
 
-    with open("data.json", 'w', encoding='utf8') as json_file:
-        json.dump(schedule, json_file, ensure_ascii=False, indent=4)
+    # handler = Handler(AbsoluteReader("../files\Філософія_БП-1_Осінь_2023–2024.docx").read())
+
+    handler.handle()
+    print(handler.data.to_markdown())
+    # schedule = to_dict(handler.data, [cols.COURSE, cols.GROUPS, cols.DAYS_OF_WEEKS], {"час": cols.TIME,
+    #                                                                                   "аудиторія": cols.LECT_HALL,
+    #                                                                                   "тижні": cols.WEEKS})
+
+    # with open("data.json", 'w', encoding='utf8') as json_file:
+    #     json.dump(schedule, json_file, ensure_ascii=False, indent=4)
 
     # schedule = remove_none((remove_without_course(read_docx("./files/doc/3.docx"))))
     # my_array = np.array(schedule)
