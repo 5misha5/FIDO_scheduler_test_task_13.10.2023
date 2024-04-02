@@ -1,0 +1,10 @@
+
+
+COLS = 6
+
+DAYS_OF_WEEKS = 0
+TIME = 1
+COURSE = 2
+GROUPS = 3
+WEEKS = 4
+LECT_HALL = 5
